@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meme Radar</title>
+<meta name="description" content="News et mouvements importants des meme coins Solana, en direct et en français.">
+<meta name="theme-color" content="#13102A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meme Radar">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one-thumb radar console. Sticky status bar, market pulse, a wire of items stamped to the second, tab bar within thumb reach. Night indigo with Shiba gold, one deliberate dark look. */
+:root {
+  --bg: #13102A; --surface: #1B1736; --surface-2: #262046; --ink: #EEEBFF; --muted: #A39DC9; --line: #2D2751;
+  --accent: #F5B83D; --accent-ink: #F5B83D; --accent-soft: rgba(245, 184, 61, .14); --on-accent: #1A1300; --crit-bg: rgba(245, 184, 61, .07);
+  --up: #3DD68C; --down: #FF6B7A; --up-soft: rgba(61, 214, 140, .12); --down-soft: rgba(255, 107, 122, .12);
+  --live: #3DD68C; --warn: #F5B83D; --scrim: rgba(0, 0, 0, .35); --shadow: 0 12px 32px rgba(0, 0, 0, .55);
+  --font-display: "Chakra Petch", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --topbar-h: 52px;
+  color-scheme: dark;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.45 var(--font-body); -webkit-tap-highlight-color: transparent; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--bg); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; opacity: .55; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.up { color: var(--up); } .down { color: var(--down); } .flat { color: var(--muted); }
+h2, h3 { text-wrap: balance; }
+
+/* top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); border-bottom: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top-in { max-width: 680px; margin-inline: auto; height: var(--topbar-h); display: flex; align-items: center; gap: 10px; }
+.brand { display: flex; align-items: center; gap: 9px; min-width: 0; margin-right: auto; }
+.wordmark { font: 700 19px/1 var(--font-display); letter-spacing: .02em; white-space: nowrap; }
+.radar { position: relative; flex: none; width: 24px; height: 24px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--accent);
+  background: radial-gradient(circle at 50% 50%, transparent 0 3.5px, var(--line) 3.5px 4.5px, transparent 4.5px 7.5px, var(--line) 7.5px 8.5px, transparent 8.5px), var(--surface-2); }
+.radar i { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg 270deg, var(--accent-soft) 300deg, var(--accent) 358deg, transparent 360deg); animation: sweep 2.4s linear infinite; }
+.radar::after { content: ""; position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); top: 5px; left: 13px; }
+[data-live="0"] .radar i { animation-play-state: paused; opacity: .35; }
+@keyframes sweep { to { transform: rotate(360deg); } }
+.pill { display: inline-flex; align-items: center; gap: 7px; flex: none; font: 600 10.5px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+  padding: 7px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink); white-space: nowrap; }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); position: relative; flex: none; }
+.pill[data-s="live"] i { background: var(--live); }
+.pill[data-s="live"] i::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 1.5px solid var(--live); animation: ping 1.8s ease-out infinite; }
+.pill[data-s="late"] i { background: var(--warn); }
+.pill[data-s="offline"] i { background: var(--down); }
+@keyframes ping { from { transform: scale(.6); opacity: .9; } to { transform: scale(1.9); opacity: 0; } }
+.clock { font: 600 13px/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); flex: none; }
+@media (max-width: 359px) { .clock { display: none; } }
+
+/* page */
+.main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 92px; }
+.main-in { max-width: 680px; margin-inline: auto; display: flex; flex-direction: column; gap: 14px; }
+.view { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.market { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.install { background: var(--surface); border: 1px solid var(--accent); border-radius: 14px; padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; }
+.install p { margin: 0; font-size: 14px; flex: 1; }
+.install b { color: var(--accent-ink); }
+.install button { flex: none; border: 0; background: none; color: var(--muted); font-size: 20px; line-height: 1; padding: 2px 4px; }
+
+.pulse { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.stat { padding: 10px 11px 9px; min-width: 0; }
+.stat + .stat { border-left: 1px solid var(--line); }
+.stat .k { font: 600 9.5px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat .v { font: 700 17px/1.15 var(--font-display); margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.stat .d { font: 600 11.5px/1.2 var(--font-mono); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+.stat .d.up { color: var(--up); } .stat .d.down { color: var(--down); }
+
+.movers-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mv-label { flex: none; font: 600 9.5px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); width: 26px; }
+.movers { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; min-width: 0; flex: 1; padding-block: 2px;
+  -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); }
+.movers::-webkit-scrollbar, .chips::-webkit-scrollbar, .chipline::-webkit-scrollbar { display: none; }
+.mv { flex: none; font: 600 12.5px/1 var(--font-mono); padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); white-space: nowrap; }
+.mv b { font-weight: 600; margin-left: 6px; }
+.mv.up b { color: var(--up); } .mv.down b { color: var(--down); }
+.mv-empty { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+.feed-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
+.feed-head h2, .view h2 { font: 700 21px/1.1 var(--font-display); letter-spacing: .01em; margin: 0; }
+.feed-head h2 { margin-right: auto; }
+.fresh { order: 3; flex-basis: 100%; font: 400 11.5px/1.3 var(--font-mono); color: var(--muted); min-width: 0; }
+.icon-btn { flex: none; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 0; }
+.icon-btn svg { width: 18px; height: 18px; }
+.icon-btn.spin svg { animation: sweep .9s linear infinite; }
+
+.chips-bar { position: sticky; top: calc(env(safe-area-inset-top, 0px) + var(--topbar-h) + 1px); z-index: 20; background: var(--bg);
+  margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 8px; }
+.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.chip { flex: none; display: inline-flex; align-items: center; gap: 6px; font: 600 13px/1 var(--font-body); padding: 9px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); white-space: nowrap; }
+.chip .n { font: 600 11px/1 var(--font-mono); color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip[aria-pressed="true"] .n { color: inherit; opacity: .7; }
+
+.feed { display: flex; flex-direction: column; min-width: 0; }
+.day { font: 600 10.5px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 16px 0 8px; }
+.day:first-child { padding-top: 4px; }
+.item { display: grid; grid-template-columns: 68px minmax(0, 1fr); gap: 12px; padding-block: 13px; border-bottom: 1px solid var(--line); }
+.item.lvl-3 { background: var(--crit-bg); margin-inline: -10px; padding-inline: 10px; border-radius: 10px; border-bottom-color: transparent; margin-block: 2px; }
+.when { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.hms { font: 600 12.5px/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+.ago { font: 400 10.5px/1.25 var(--font-mono); color: var(--muted); }
+.body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12px; color: var(--muted); }
+.src { font-weight: 600; max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.src:empty { display: none; }
+.lv { font: 600 10px/1 var(--font-mono); letter-spacing: .08em; color: var(--muted); }
+.lvl-2 .lv { color: var(--ink); } .lvl-3 .lv { color: var(--accent-ink); }
+.sig { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+.sig i { width: 3px; border-radius: 1px; background: var(--line); }
+.sig i:nth-child(1) { height: 5px; } .sig i:nth-child(2) { height: 8px; } .sig i:nth-child(3) { height: 12px; }
+.sig[data-l="1"] i:nth-child(1), .sig[data-l="2"] i:nth-child(-n+2), .sig[data-l="3"] i { background: var(--accent); }
+.new { font: 600 9.5px/1 var(--font-mono); letter-spacing: .06em; padding: 3px 6px; border-radius: 4px; background: var(--accent); color: var(--on-accent); animation: blink 1.2s ease-in-out 3; }
+@keyframes blink { 50% { opacity: .35; } }
+.vo { font: 600 9.5px/1 var(--font-mono); letter-spacing: .06em; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--line); background: transparent; color: var(--muted); }
+.vo[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); }
+.hl { font: 600 15.5px/1.35 var(--font-body); color: var(--ink); text-decoration: none; overflow-wrap: anywhere; text-wrap: pretty; }
+a.hl:hover { text-decoration: underline; text-underline-offset: 3px; }
+a.hl:visited { color: var(--muted); }
+.is-signal .hl { font-family: var(--font-display); font-weight: 700; font-size: 16px; letter-spacing: .01em; }
+.orig { margin: 0; font-size: 13px; line-height: 1.4; color: var(--muted); font-style: italic; overflow-wrap: anywhere; }
+.desc { margin: 0; font-size: 13.5px; line-height: 1.4; color: var(--muted); overflow-wrap: anywhere; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag { font: 600 11.5px/1 var(--font-body); padding: 5px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink); white-space: nowrap; }
+.t-listing, .t-fav, .t-launch { background: var(--accent-soft); color: var(--accent-ink); }
+.t-hack { background: var(--down-soft); color: var(--down); }
+.t-meme { font-family: var(--font-mono); font-size: 11px; }
+.t-off { background: transparent; border: 1px dashed var(--muted); color: var(--muted); }
+.item.flash { animation: flash 1.6s ease-out 1; }
+@keyframes flash { from { box-shadow: inset 0 0 0 2px var(--accent); } to { box-shadow: inset 0 0 0 2px transparent; } }
+.empty { padding: 26px 4px; color: var(--muted); font-size: 14px; list-style: none; margin: 0; }
+.skel { display: grid; grid-template-columns: 68px 1fr; gap: 12px; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.skel span { display: block; height: 11px; border-radius: 6px; background: var(--surface-2); }
+.skel div { display: grid; gap: 8px; }
+.foot { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+
+.line-wrap { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.sub { font: 600 10.5px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.chipline { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+.chipline a { flex: none; display: flex; flex-direction: column; gap: 4px; padding: 9px 11px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); text-decoration: none; color: var(--ink); max-width: 180px; }
+.chipline .nm { font: 600 12.5px/1.2 var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chipline .ch { font: 600 12px/1 var(--font-mono); }
+.chipline .rk { font: 400 10.5px/1 var(--font-mono); color: var(--muted); }
+.coins-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.search { flex: 1 1 160px; min-width: 0; font: 400 16px/1.2 var(--font-body); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.search::placeholder { color: var(--muted); }
+.seg { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { font: 600 13px/1 var(--font-body); padding: 8px 10px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--bg); color: var(--ink); box-shadow: 0 1px 2px var(--scrim); }
+.coins { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.coins-head, .c-main { display: grid; grid-template-columns: minmax(0, 1fr) auto 58px 58px; gap: 8px; align-items: center; }
+.coins-head { font: 600 9.5px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 0 0 6px 36px; border-bottom: 1px solid var(--line); }
+.coins-head span:nth-child(n+2) { text-align: right; }
+.coin { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 8px; align-items: center; border-bottom: 1px solid var(--line); }
+.grp { list-style: none; font: 600 10.5px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 16px 0 8px; }
+.star { width: 28px; height: 28px; display: grid; place-items: center; border: 0; background: none; color: var(--line); padding: 0; }
+.star svg { width: 18px; height: 18px; }
+.star[aria-pressed="true"] { color: var(--accent); }
+.c-main { border: 0; background: none; padding: 11px 0; text-align: left; min-width: 0; }
+.c-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.c-name b { font: 700 15px/1.1 var(--font-display); letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-name span { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-price, .c-ch { font: 600 13px/1 var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.c-more { grid-column: 1 / -1; padding: 0 0 14px 36px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.c-more dl { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
+.c-more dt { font: 600 9.5px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.c-more dd { margin: 3px 0 0; font: 600 13px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
+.c-more a { font-weight: 600; font-size: 13.5px; color: var(--accent-ink); }
+
+.group { display: flex; flex-direction: column; gap: 8px; }
+.rowset { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 14px; }
+.set-row.col { flex-direction: column; align-items: stretch; gap: 10px; }
+.set-row + .set-row { border-top: 1px solid var(--line); }
+.set-row small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.set-row p { margin: 0; font-size: 14px; }
+.set-row ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.switch { appearance: none; -webkit-appearance: none; flex: none; margin: 0; width: 46px; height: 28px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); position: relative; cursor: pointer; transition: background .15s; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s; }
+.switch:checked { background: var(--accent); border-color: transparent; }
+.switch:checked::after { transform: translateX(18px); background: var(--on-accent); }
+.btn { font: 600 14px/1 var(--font-body); padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); }
+.btn.primary { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.field { width: 100%; font: 400 16px/1.2 var(--font-mono); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+.note { font-size: 12.5px; color: var(--muted); margin: 0; }
+.disclaimer { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tab-in { max-width: 680px; margin-inline: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 9px 4px 10px; border: 0; background: none; color: var(--muted); font: 600 11.5px/1 var(--font-body); }
+.tab svg { width: 22px; height: 22px; }
+.tab[aria-selected="true"] { color: var(--ink); }
+.tab[aria-selected="true"] svg { color: var(--accent); }
+
+.toast { position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + var(--topbar-h) + 10px);
+  left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); max-width: 648px; margin-inline: auto;
+  display: flex; flex-direction: column; gap: 5px; text-align: left; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 12px 14px; }
+.toast .t-k { display: flex; align-items: center; gap: 8px; font: 600 10.5px/1 var(--font-mono); letter-spacing: .08em; color: var(--accent-ink); text-transform: uppercase; }
+.toast .t-h { font-weight: 600; font-size: 14.5px; line-height: 1.35; }
+.toast .t-m { font-size: 12px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .radar i, .pill[data-s="live"] i::after, .new, .icon-btn.spin svg, .item.flash { animation: none !important; } }
+</style>
+</head>
+<body>
+<header class="top" id="top" data-live="0">
+  <div class="top-in">
+    <div class="brand"><span class="radar" aria-hidden="true"><i></i></span><span class="wordmark">Meme Radar</span></div>
+    <span class="pill" id="status" data-s="loading" role="status"><i></i><span id="status-txt">Connexion…</span></span>
+    <time class="clock" id="clock" aria-label="Heure actuelle">--:--:--</time>
+  </div>
+</header>
+
+<main class="main">
+  <div class="main-in">
+    <div class="install" id="install" hidden>
+      <p>Installe Meme Radar comme une app : dans Safari, touche <b>Partager</b> puis <b>« Sur l'écran d'accueil »</b>.</p>
+      <button type="button" id="install-x" aria-label="Masquer">×</button>
+    </div>
+
+    <section class="market" id="market" aria-label="Pouls du marché">
+      <div class="pulse" id="pulse"></div>
+      <div class="movers-row"><span class="mv-label">1&#8239;h</span><div class="movers" id="movers"><span class="mv-empty">Les plus gros mouvements s'afficheront ici.</span></div></div>
+    </section>
+
+    <section class="view" id="view-feed" role="tabpanel" aria-labelledby="tab-feed">
+      <div class="feed-head">
+        <h2>Fil en direct</h2>
+        <span class="fresh" id="fresh">—</span>
+        <button type="button" class="icon-btn" id="refresh" aria-label="Actualiser maintenant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></button>
+      </div>
+      <div class="chips-bar"><div class="chips" id="chips" aria-label="Filtres"></div></div>
+      <div class="feed" id="feed"></div>
+      <p class="foot">Écosystème Solana. News des grands médias crypto et de Google News, prix DexScreener, tendances CoinGecko. Infos seulement, pas un conseil financier.</p>
+    </section>
+
+    <section class="view" id="view-coins" role="tabpanel" aria-labelledby="tab-coins" hidden>
+      <h2>Memes Solana</h2>
+      <div class="line-wrap" id="trend-wrap" hidden><p class="sub">Tokens Solana en tendance sur CoinGecko</p><div class="chipline" id="trend"></div></div>
+      <div class="coins-tools">
+        <input class="search" id="coin-q" type="search" placeholder="Chercher un coin (BONK, WIF…)" autocomplete="off" aria-label="Chercher un coin">
+        <div class="seg" id="coin-sort" role="group" aria-label="Trier par">
+          <button type="button" data-v="h1">1&#8239;h</button><button type="button" data-v="h24">24&#8239;h</button><button type="button" data-v="vol24">Volume</button><button type="button" data-v="mcap">Cap.</button>
+        </div>
+      </div>
+      <div>
+        <div class="coins-head" aria-hidden="true"><span>Coin</span><span>Prix</span><span>1&#8239;h</span><span>24&#8239;h</span></div>
+        <ul class="coins" id="coins"></ul>
+      </div>
+      <p class="foot">Prix DexScreener, rafraîchis toutes les 20 secondes quand l'app est ouverte. Touche une ligne pour le détail, l'étoile pour l'ajouter à « Mes coins ».</p>
+    </section>
+
+    <section class="view" id="view-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+      <h2>Réglages</h2>
+      <div class="group">
+        <p class="sub">Notifications</p>
+        <div class="rowset">
+          <div class="set-row col"><p>Les alertes critiques arrivent sur ton téléphone par <b>Telegram</b> (ou par l'app <b>ntfy</b>), même quand Meme Radar est fermée. Le robot vérifie les news et les prix toutes les 5 minutes : lancements de coins, listings, hacks, pannes, gros pumps et dumps.</p></div>
+          <div class="set-row col">
+            <label for="ntfy-topic"><span>Si tu utilises ntfy : tester les notifs<small>Entre ton canal ntfy (il reste sur ce téléphone) puis envoie une notif d'essai.</small></span></label>
+            <input class="field" id="ntfy-topic" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="memeradar-…">
+            <div class="btn-row"><button type="button" class="btn primary" id="ntfy-test">Envoyer une notif de test</button><span class="note" id="ntfy-note"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="group">
+        <p class="sub">Alertes dans l'app</p>
+        <div class="rowset">
+          <label class="set-row" for="set-sound"><span>Bip quand une alerte tombe<small>Ne sonne pas si l'iPhone est en mode silencieux.</small></span><input type="checkbox" class="switch" id="set-sound"></label>
+          <div class="set-row col"><span>Alerter pour</span>
+            <div class="seg" id="set-level" role="group" aria-label="Niveau d'alerte"><button type="button" data-v="5">Critiques</button><button type="button" data-v="3">Importantes et +</button><button type="button" data-v="1">Tout</button></div>
+          </div>
+          <div class="set-row col"><span>Mouvement éclair en direct<small>Alerte quand un meme bouge plus que ça en 5 minutes pendant que l'app est ouverte.</small></span>
+            <div class="seg" id="set-fast" role="group" aria-label="Seuil mouvement éclair"><button type="button" data-v="4">4&#8239;%</button><button type="button" data-v="6">6&#8239;%</button><button type="button" data-v="10">10&#8239;%</button></div>
+          </div>
+          <label class="set-row" for="set-wake"><span>Garder l'écran allumé<small id="wake-note">Pratique pour surveiller le fil.</small></span><input type="checkbox" class="switch" id="set-wake"></label>
+        </div>
+      </div>
+      <div class="group">
+        <p class="sub">Contenu</p>
+        <div class="rowset">
+          <label class="set-row" for="set-general"><span>Ajouter les grosses news hors Solana<small>Seulement les critiques (Fed, gros hack d'exchange…), qui font aussi bouger les memes.</small></span><input type="checkbox" class="switch" id="set-general"></label>
+        </div>
+      </div>
+      <div class="group">
+        <p class="sub">Installer sur l'iPhone</p>
+        <div class="rowset"><div class="set-row col"><ol><li>Ouvre cette page dans Safari.</li><li>Touche le bouton Partager (le carré avec une flèche).</li><li>Choisis « Sur l'écran d'accueil », puis Ajouter.</li></ol></div></div>
+      </div>
+      <p class="disclaimer">Meme Radar affiche des infos publiques et des calculs automatiques (signaux de prix, tri par importance, traduction automatique). Ce n'est pas un conseil financier : un meme coin peut perdre l'essentiel de sa valeur en quelques minutes.</p>
+    </section>
+  </div>
+</main>
+
+<nav class="tabbar" aria-label="Sections">
+  <div class="tab-in" role="tablist">
+    <button type="button" class="tab" role="tab" id="tab-feed" data-tab="feed" aria-controls="view-feed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="6" r="1.5"/><circle cx="5" cy="12" r="1.5"/><circle cx="5" cy="18" r="1.5"/><path d="M10 6h10M10 12h10M10 18h6"/></svg>Fil</button>
+    <button type="button" class="tab" role="tab" id="tab-coins" data-tab="coins" aria-controls="view-coins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8 14.5l2.5-3 2.5 2 3-4"/></svg>Memes Solana</button>
+    <button type="button" class="tab" role="tab" id="tab-settings" data-tab="settings" aria-controls="view-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Réglages</button>
+  </div>
+</nav>
+<button type="button" class="toast" id="toast" hidden aria-live="polite"></button>
+
+<script src="app.js" defer></script>
+</body>
+</html>
